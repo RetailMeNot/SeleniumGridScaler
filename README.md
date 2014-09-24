@@ -81,7 +81,7 @@ Note that on top of the SeleniumGridScaler configuration, you can use all existi
 ## Test Access
 If you're trying to test against a website thats not publicly available on the internet, such as a private testing environment behind a firewall, you will need to setup up some sort of solution to allow your nodes have to access your test environment(s).  Two ways of granting access have been included below.
 
-* **Whitelist IP Addresses** One way to accomplish access for your dynamically started nodes to have access to your test environments is by white listing IP addresses in AWS.  This [guide](https://github.com/RetailMeNot/RetailMeNot/blob/master/HowToSetupAVPC.html) is a great way to show how to setup two separate subnets, and route all traffic through a single NAT machine so that you only have to whitelist the IP address of the NAT machine, and not for every individual node.  Essentially, you'll create a VPC with 2 subnets, one private and one public, each occupying half the range of the VPC (or whatever you prefer).  The NAT will live in the public subnet, with the nodes living in the private subnet.  You will then configure a security group to route all external traffic (outside the VPC range) in the private subnet through the NAT and associate this security group with your nodes when you start them up.  You will also want to create an internet gateway and associate it with your VPC so your machines can have access to the internet.
+* **Whitelist IP Addresses** One way to accomplish access for your dynamically started nodes to have access to your test environments is by white listing IP addresses in AWS.  This [guide](https://github.com/RetailMeNot/SeleniumGridScaler/blob/master/HowToSetupAVPC.md) is a great way to show how to setup two separate subnets, and route all traffic through a single NAT machine so that you only have to whitelist the IP address of the NAT machine, and not for every individual node.  Essentially, you'll create a VPC with 2 subnets, one private and one public, each occupying half the range of the VPC (or whatever you prefer).  The NAT will live in the public subnet, with the nodes living in the private subnet.  You will then configure a security group to route all external traffic (outside the VPC range) in the private subnet through the NAT and associate this security group with your nodes when you start them up.  You will also want to create an internet gateway and associate it with your VPC so your machines can have access to the internet.
 
 * **Setup a Tunnel** Another way to configure access for your nodes to hit your test environments would be to setup a network tunnel of some sort.  You would then need to modify the AMI to run this tunnel on startup or have it running 24/7.  You will probably need to work with your IT department to accomplish this.
 
@@ -132,7 +132,7 @@ All pull requests are greatly appreciated! This project is intended for end user
 The SeleniumGridScaler is a Maven/Java project, using JUnit for unit tests, Cobertura for coverage checks, and Selenium for web browser interaction.
 
 ## Contact
-For any questions, concerns, or problems, please feel free to contact the author Matthew Hardin at matthew.hardin@gmail.com
+For any questions, concerns, or problems, please feel free to contact the author Matthew Hardin at mhardin.github@gmail.com
 
 ## License
 
