@@ -1,0 +1,92 @@
+<!--
+  ~ Copyright (C) 2014 RetailMeNot, Inc.
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  -->
+
+<configuration debug="true">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{"MMM dd, yyyy HH:mm:ss:SSS aaa"} - %-5level [%thread] [%logger{0}] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.FileAppender">
+        <!-- Log location defaults to log/automation.log or you can override the directory and file name with the 'logLocation' system property -->
+        <File>${logLocation:-log/automation.log}</File>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%date{"MMM dd, yyyy HH:mm:ss:SSS aaa"} - %-5level [%thread] [%logger{0}] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.rmn.qa.aws.AwsVmManager">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.servlet.AutomationTestRunServlet">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.servlet.AutomationStatusServlet">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.servlet.StatusServlet">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.task.AbstractAutomationCleanupTask">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.task.AutomationHubCleanupTask">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.task.AutomationNodeCleanupTask">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.task.AutomationNodeRegistryTask">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.task.AutomationHubCleanupTask">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.AutomationCapabilityMatcher">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.AutomationRunContext">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.AutomationRequestMatcher">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.aws.AwsTagReporter">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="com.rmn.qa.AutomationContext">
+        <level value="INFO"/>
+        <appender-ref ref="FILE" />
+    </logger>
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
+
+

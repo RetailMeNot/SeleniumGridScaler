@@ -1,0 +1,70 @@
+/*
+ * Copyright (C) 2014 RetailMeNot, Inc.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+package com.rmn.qa;
+
+import com.amazonaws.services.ec2.model.Instance;
+import com.rmn.qa.aws.VmManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MockVmManager implements VmManager {
+
+    private boolean nodesLaunched = false;
+    private int numberLaunched;
+    private String browser;
+    private boolean throwException = false;
+    private boolean terminated = false;
+
+
+    @Override
+    public List<Instance> launchNodes(String uuid, String os, String browser, String hubHostName, int nodeCount, int maxSessions) {
+        if(throwException) {
+            throw new RuntimeException("Can't start nodes");
+        }
+        this.nodesLaunched = true;
+        this.numberLaunched = nodeCount;
+        this.browser = browser;
+        Instance instance = new Instance();
+        instance.setInstanceId("instanceId");
+        List<Instance> instances = new ArrayList<Instance>();
+        instances.add(instance);
+        return instances;
+    }
+
+    @Override
+    public boolean terminateInstance(String instanceId) {
+        terminated = true;
+        return true;
+    }
+
+    public boolean isNodesLaunched() {
+        return nodesLaunched;
+    }
+
+    public String getBrowser() {
+        return browser;
+    }
+
+    public int getNumberLaunched() {
+        return numberLaunched;
+    }
+
+    public void setThrowException() {
+        throwException = true;
+    }
+
+    public boolean isTerminated() {
+        return terminated;
+    }
+}

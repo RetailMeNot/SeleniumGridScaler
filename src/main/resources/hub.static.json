@@ -1,0 +1,15 @@
+{
+  "host": null,
+  "port": 4444,
+  "newSessionWaitTimeout": -1,
+  "prioritizer": null,
+  "throwOnCapabilityNotPresent": false,
+  "nodePolling": 5000,
+  "unregisterIfStillDownAfter": 5000,
+  "cleanUpCycle": 5000,
+  "timeout": 80000,
+  "servlets": ["com.rmn.qa.servlet.AutomationTestRunServlet","com.rmn.qa.servlet.StatusServlet"],
+  "capabilityMatcher": "com.rmn.qa.AutomationCapabilityMatcher",
+  "browserTimeout": 70000,
+  "jettyMaxThreads":1024
+}

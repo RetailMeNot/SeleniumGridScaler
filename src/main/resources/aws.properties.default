@@ -1,0 +1,34 @@
+########### Rename this file to 'aws.properties' to override default values
+
+region=east
+
+# Endpoints
+east_endpoint=https://us-east-1.ec2.amazonaws.com
+west_endpoint=https://us-west-1.ec2.amazonaws.com
+
+
+# Node AMI Info
+east_linux_node_ami=ami-7039e318
+east_windows_node_ami=ami-41eaed28
+node_instance_type_chrome=c3.large
+# Firefox and IE will only run in 1 browser per VM so we'll use micros for them
+node_instance_type_firefox=t2.micro
+node_instance_type_internetexplorer=t2.micro
+
+
+# Security Group Info
+# east_security_group=sg-74946211
+# VPC Info
+# east_subnet_id=subnet-00000000
+# Fallback VPCs
+# east_subnet_fallback_id_1=subnet-11111111
+# east_subnet_fallback_id_2=subnet-22222222
+# east_subnet_fallback_id_3=subnet-33333333
+
+# Key
+east_key_name=grid-test-east
+
+# Tags to be used
+tagProduct=Department,QA
+
+
