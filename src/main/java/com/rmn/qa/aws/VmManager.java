@@ -11,7 +11,9 @@
  */
 package com.rmn.qa.aws;
 
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.rmn.qa.NodesCouldNotBeStartedException;
 
 import java.util.List;
@@ -37,4 +39,11 @@ public interface VmManager {
      */
     // TODO Rename to be node or instance in the name
     boolean terminateInstance(String instanceId);
+
+    /**
+     * Returns a list of reservations as defined in the {@link com.amazonaws.services.ec2.model.DescribeInstancesRequest DescribeInstancesRequest}
+     * @param describeInstancesRequest
+     * @return
+     */
+    List<Reservation> describeInstances(DescribeInstancesRequest describeInstancesRequest);
 }

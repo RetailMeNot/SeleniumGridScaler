@@ -26,6 +26,7 @@ import com.rmn.qa.aws.VmManager;
 import com.rmn.qa.task.AutomationHubCleanupTask;
 import com.rmn.qa.task.AutomationNodeCleanupTask;
 import com.rmn.qa.task.AutomationNodeRegistryTask;
+import com.rmn.qa.task.AutomationReaperTask;
 import com.rmn.qa.task.AutomationRunCleanupTask;
 import org.openqa.grid.internal.ProxySet;
 import org.openqa.grid.internal.Registry;
@@ -110,6 +111,15 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
                  AutomationTestRunServlet.HUB_TERMINATE_START_DELAY_IN_MINUTES,AutomationTestRunServlet.HUB_TERMINATION_POLLING_TIME_IN_MINUTES, TimeUnit.MINUTES);
         } else {
             log.info("Hub is not a dynamic hub -- termination logic will not be started");
+        }
+        String runReaperThread = System.getProperty(AutomationConstants.REAPER_THREAD_CONFIG);
+        // Reaper thread defaults to on unless specified not to run
+        if(!"false".equalsIgnoreCase(runReaperThread)) {
+            // Spin up a scheduled thread to terminate orphaned instances
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new AutomationReaperTask(this,ec2),
+                    AutomationTestRunServlet.HUB_TERMINATE_START_DELAY_IN_MINUTES,AutomationTestRunServlet.NODE_REGISTRATION_POLLING_TIME_IN_MINUTES, TimeUnit.MINUTES);
+        } else {
+            log.info("Reaper thread not running due to config flag.");
         }
     }
 

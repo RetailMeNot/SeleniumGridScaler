@@ -12,7 +12,9 @@
 
 package com.rmn.qa;
 
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.rmn.qa.aws.VmManager;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ public class MockVmManager implements VmManager {
     private String browser;
     private boolean throwException = false;
     private boolean terminated = false;
+    private List<Reservation> reservations;
 
 
     @Override
@@ -48,6 +51,11 @@ public class MockVmManager implements VmManager {
         return true;
     }
 
+    @Override
+    public List<Reservation> describeInstances(DescribeInstancesRequest describeInstancesRequest) {
+        return reservations;
+    }
+
     public boolean isNodesLaunched() {
         return nodesLaunched;
     }
@@ -66,5 +74,9 @@ public class MockVmManager implements VmManager {
 
     public boolean isTerminated() {
         return terminated;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 }

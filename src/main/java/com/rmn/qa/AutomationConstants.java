@@ -35,4 +35,5 @@ public interface AutomationConstants {
     String AWS_ACCESS_KEY="awsAccessKey";
     String AWS_PRIVATE_KEY="awsSecretKey";
     String AWS_DEFAULT_RESOURCE_NAME= "aws.properties.default";
+    String REAPER_THREAD_CONFIG = "useReaperThread";
 }
