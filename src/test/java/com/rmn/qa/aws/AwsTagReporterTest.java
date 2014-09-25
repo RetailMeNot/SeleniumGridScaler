@@ -25,7 +25,7 @@ import java.util.Properties;
 public class AwsTagReporterTest {
 
     @Test
-    public void testTagsAssociated() {
+         public void testTagsAssociated() {
         MockAmazonEc2Client client = new MockAmazonEc2Client(null);
         Collection<Instance> instances = Arrays.asList(new Instance());
         DescribeInstancesResult describeInstancesResult = new DescribeInstancesResult();
@@ -34,7 +34,24 @@ public class AwsTagReporterTest {
         reservation.setInstances(instances);
         client.setDescribeInstances(describeInstancesResult);
         Properties properties = new Properties();
-        properties.setProperty("accounting_tag","foo");
+        properties.setProperty("tagAccounting","key,value");
+        properties.setProperty("function_tag","foo2");
+        properties.setProperty("product_tag","foo3");
+        AwsTagReporter reporter = new AwsTagReporter("testUuid",client,instances,properties);
+        reporter.run();
+    }
+
+    @Test
+    public void testExceptionCaught() {
+        MockAmazonEc2Client client = new MockAmazonEc2Client(null);
+        Collection<Instance> instances = Arrays.asList(new Instance());
+        DescribeInstancesResult describeInstancesResult = new DescribeInstancesResult();
+        Reservation reservation = new Reservation();
+        describeInstancesResult.setReservations(Arrays.asList(reservation));
+        reservation.setInstances(instances);
+        client.setDescribeInstances(describeInstancesResult);
+        Properties properties = new Properties();
+        properties.setProperty("tagAccounting","key");
         properties.setProperty("function_tag","foo2");
         properties.setProperty("product_tag","foo3");
         AwsTagReporter reporter = new AwsTagReporter("testUuid",client,instances,properties);
