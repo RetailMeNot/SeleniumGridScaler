@@ -14,9 +14,11 @@ package com.rmn.qa.aws;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
@@ -300,6 +302,11 @@ public class AwsVmManager implements VmManager {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<Reservation> describeInstances(DescribeInstancesRequest describeInstancesRequest) {
+        return client.describeInstances(describeInstancesRequest).getReservations();
     }
 
     /**

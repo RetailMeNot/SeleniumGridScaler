@@ -36,6 +36,7 @@ The -hubConfig configuration key and value are optional to specify Selenium Hub 
 * ipAddress (required) - Resolvable host name or ip address of the hub for started nodes to connect to.  Note 'localhost' or '127.0.0.1' will not work as this will not be resolvable from the context of another machine
 * totalNodeCount - Maximum number of nodes that can connect to your hub.  Defaults to 150 if not specified
 * extraCapabilities - CSV list of capabilities you want to be considered if specified client side (e.g. adding 'target' to this list will require any capabilities coming in with the 'target' key present to match the value in the node config)
+* useReaperThread - Set this to 'false' if you do not want the reaper thread running.  The reaper thread will automatically terminate instances that are not registered with the hub to prevent unused instances from accumulating in AWS over time.  This can be useful to disable if you're trying to debug a node that the plugin started and killed the java process on it.
 
 More information can be found [here](http://docs.aws.amazon.com/AWSSecurityCredentials/1.0/AboutAWSCredentials.html) on AWS Access
 
