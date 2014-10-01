@@ -302,7 +302,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
      * @return
      */
     private boolean browserSupportedByAmis(String browser) {
-        return AutomationUtils.lowerCaseMatch("chrome",browser) || AutomationUtils.lowerCaseMatch("firefox",browser) || AutomationUtils.lowerCaseMatch("internetexplorer",browser);
+        return AutomationUtils.lowerCaseMatch(BrowserType.CHROME,browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX,browser) || AutomationUtils.lowerCaseMatch("internetexplorer",browser);
     }
 
     @Override

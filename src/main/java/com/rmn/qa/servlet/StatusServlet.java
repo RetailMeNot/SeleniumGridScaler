@@ -22,6 +22,7 @@ import org.openqa.grid.internal.utils.GridHubConfiguration;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 import org.openqa.grid.web.servlet.RegistryBasedServlet;
 import org.openqa.grid.web.utils.BrowserNameUtils;
+import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
@@ -105,8 +106,8 @@ public class StatusServlet extends RegistryBasedServlet {
         builder.append("<H1>Grid Hub ");
         builder.append(coreVersion).append(coreRevision);
         builder.append("</H1>");
-        int chromeThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null,"chrome"));
-        int firefoxThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null,"firefox"));
+        int chromeThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null, BrowserType.CHROME));
+        int firefoxThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null,BrowserType.FIREFOX));
         int ieThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null,"internetexplorer"));
         builder.append("<H2>Free Threads - Chrome: ").append(chromeThreads).append(" Firefox: ").append(firefoxThreads).append(" IE: ").append(ieThreads).append("</H2>");
 
