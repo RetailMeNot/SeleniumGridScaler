@@ -235,7 +235,11 @@ public final class AutomationRunContext {
      */
     private boolean isRunOld(AutomationRunRequest runRequest) {
         // Get the amount of seconds passed
-        return System.currentTimeMillis() > runRequest.getCreatedDate().getTime() + (AutomationRunContext.CLEANUP_LIFE_LENGTH_IN_SECONDS * 1000);
+       if(AutomationUtils.lowerCaseMatch("internetexplorer",runRequest.getBrowser())) {
+           return System.currentTimeMillis() > runRequest.getCreatedDate().getTime() + (10 * 60 * 1000); // 10 minutes for IE to come online
+       } else {
+           return System.currentTimeMillis() > runRequest.getCreatedDate().getTime() + (AutomationRunContext.CLEANUP_LIFE_LENGTH_IN_SECONDS * 1000);
+       }
     }
 
     /**
@@ -288,7 +292,7 @@ public final class AutomationRunContext {
                 }
             }
         }
-        // Now process all registered runs to make sure there werent any requests that just haven't had any started nodes
+        // Now process all registered runs to make sure there weren't any requests that just haven't had any started nodes
         for(String uuid : runsToSessions.keySet()) {
             AutomationRunRequest registeredRun = getRunRequest(uuid);
             // If a the registered run exists AND is still new, we should count the original request amount as all tests may not be in flight yet
