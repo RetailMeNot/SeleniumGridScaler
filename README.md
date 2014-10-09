@@ -1,4 +1,4 @@
-# SeleniumGridScaler
+# SeleniumGridScaler [![Build Status](https://travis-ci.org/RetailMeNot/SeleniumGridScaler.svg?branch=master)](https://travis-ci.org/RetailMeNot/SeleniumGridScaler)
 
 ***
 #### Overview
