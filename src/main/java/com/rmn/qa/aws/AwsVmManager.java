@@ -83,8 +83,16 @@ public class AwsVmManager implements VmManager {
     public AwsVmManager(String region) {
         awsProperties = initAWSProperties();
         this.region = awsProperties.getProperty("region");
-        credentials = getCredentials();
-        client = new AmazonEC2Client(credentials);
+        /**
+         * By default we use the credentials provided in the configuration files.
+         * If there are none we fall back to IAM roles.
+         */
+        try {
+            credentials = getCredentials();
+            client = new AmazonEC2Client(credentials);
+        } catch (IllegalArgumentException e) {
+            client = new AmazonEC2Client();
+        }
         client.setEndpoint(awsProperties.getProperty(region + "_endpoint"));
     }
 
@@ -381,8 +389,10 @@ public class AwsVmManager implements VmManager {
     @VisibleForTesting
     String getS3Config() {
         String s3Config = getFileContents(".s3cfg");
-        s3Config = s3Config.replaceAll("<ACCESS_KEY>",credentials.getAWSAccessKeyId());
-        s3Config = s3Config.replaceAll("<SECRET_KEY>",credentials.getAWSSecretKey());
+        if (credentials != null) {
+            s3Config = s3Config.replaceAll("<ACCESS_KEY>", credentials.getAWSAccessKeyId());
+            s3Config = s3Config.replaceAll("<SECRET_KEY>", credentials.getAWSSecretKey());
+        }
         return s3Config;
     }
 
