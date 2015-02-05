@@ -71,9 +71,13 @@ public class AwsVmManager implements VmManager {
         NODE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    /**
+     * Creates a new AwsVMManager instance using
+     * the reagion from the properties file
+     */
     public AwsVmManager() {
-        // Default the the east region
-        this("east");
+        awsProperties = initAWSProperties();
+        this.region = awsProperties.getProperty("region");
     }
 
     /**
@@ -82,7 +86,7 @@ public class AwsVmManager implements VmManager {
      */
     public AwsVmManager(String region) {
         awsProperties = initAWSProperties();
-        this.region = awsProperties.getProperty("region");
+        this.region = region;
         /**
          * By default we use the credentials provided in the configuration files.
          * If there are none we fall back to IAM roles.
