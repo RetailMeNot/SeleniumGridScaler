@@ -291,7 +291,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
                                               numThreadsPerMachine));
             }
         } catch(Exception e) {
-            log.error("Error trying to start nodes: " + e);
+            log.error("Error trying to start nodes", e);
             throw new NodesCouldNotBeStartedException("Error trying to start nodes",e);
         }
     }

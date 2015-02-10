@@ -11,7 +11,7 @@
             "maxInstances": <MAX_SESSION_CHROME>,
             "instanceId": "<INSTANCE_ID>",
             "seleniumProtocol": "WebDriver"
-        },
+        }
     ],
     "configuration":
     {
