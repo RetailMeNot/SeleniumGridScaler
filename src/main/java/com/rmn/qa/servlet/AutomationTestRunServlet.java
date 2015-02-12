@@ -263,11 +263,11 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
             }
             // TODO Make matching logic better
             int numThreadsPerMachine;
-            if(AutomationUtils.lowerCaseMatch(BrowserType.CHROME,browser)) {
-                numThreadsPerMachine = AwsVmManager.CHROME_THREAD_COUNT;
+            if (AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser)) {
+                numThreadsPerMachine = Integer.parseInt((String) AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT));
                 //TODO Browser Enum replacement here
-            } else if (AutomationUtils.lowerCaseMatch(BrowserType.IE,browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX,browser)) {
-                numThreadsPerMachine= AwsVmManager.FIREFOX_IE_THREAD_COUNT;
+            } else if (AutomationUtils.lowerCaseMatch(BrowserType.IE, browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser)) {
+                numThreadsPerMachine = Integer.parseInt((String) AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT));
             } else {
                 log.warn("Unsupported browser: " + browser);
                 throw new NodesCouldNotBeStartedException("Unsupported browser: " + browser);
@@ -297,12 +297,14 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
     }
 
     /**
-     * Returns true if the requested browser can be used within AMIs, and false otherwise
+     * Returns true if the requested browser can be used within AMIs, and false
+     * otherwise
+     *
      * @param browser
      * @return
      */
     private boolean browserSupportedByAmis(String browser) {
-        return AutomationUtils.lowerCaseMatch(BrowserType.CHROME,browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX,browser) || AutomationUtils.lowerCaseMatch("internetexplorer",browser);
+        return AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser) || AutomationUtils.lowerCaseMatch("internetexplorer", browser);
     }
 
     @Override

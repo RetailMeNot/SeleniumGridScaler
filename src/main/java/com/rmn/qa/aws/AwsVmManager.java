@@ -72,8 +72,6 @@ public class AwsVmManager implements VmManager {
     private AmazonEC2Client client;
     BasicAWSCredentials credentials;
     private Properties awsProperties;
-    public static final int CHROME_THREAD_COUNT = 6;
-    public static final int FIREFOX_IE_THREAD_COUNT = 1;
 
     private String region;
 
@@ -87,7 +85,7 @@ public class AwsVmManager implements VmManager {
      * file
      */
     public AwsVmManager() {
-        awsProperties = initAWSProperties();
+        awsProperties = AwsVmManager.getAWSProperties();
         this.region = awsProperties.getProperty("region");
         /**
          * By default we use the credentials provided in the configuration
@@ -108,7 +106,7 @@ public class AwsVmManager implements VmManager {
      * @param region
      */
     public AwsVmManager(String region) {
-        awsProperties = initAWSProperties();
+        awsProperties = AwsVmManager.getAWSProperties();
         this.region = region;
         /**
          * By default we use the credentials provided in the configuration
@@ -144,7 +142,7 @@ public class AwsVmManager implements VmManager {
      *
      * @return
      */
-    Properties initAWSProperties() {
+    public static Properties getAWSProperties() {
         Properties properties = new Properties();
         String propertiesLocation = System.getProperty("propertyFileLocation");
         // If the user passed in an AWS config file, go ahead and use it instead of the default one
@@ -227,7 +225,7 @@ public class AwsVmManager implements VmManager {
         log.info("Run request result returned.  Adding tags");
         //Tag the instances with the standard RMN AWS data
         List<Instance> instances = runInstancesResult.getReservation().getInstances();
-        if (instances.size() == 0) {
+        if (instances.isEmpty()) {
             throw new NodesCouldNotBeStartedException(String.format("Error starting up nodes -- count was zero and did not match expected count of %d", numberToStart));
         }
         associateTags(new Date().toString(), instances);
@@ -468,9 +466,24 @@ public class AwsVmManager implements VmManager {
         }
         String nodeConfig = getFileContents(resourceName);
         nodeConfig = nodeConfig.replaceAll("<MAX_SESSION>", String.valueOf(maxSessions));
-        nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.FIREFOX_IE_THREAD_COUNT));
-        nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.FIREFOX_IE_THREAD_COUNT));
-        nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.CHROME_THREAD_COUNT));
+        if (AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT)));
+        } else if (AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+        } else if (AutomationUtils.lowerCaseMatch(BrowserType.IE, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+        } else {
+            // default
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT)));
+        }
         nodeConfig = nodeConfig.replaceAll("<UUID>", uuid);
         nodeConfig = nodeConfig.replaceAll("<CREATED_BROWSER>", browser);
         nodeConfig = nodeConfig.replaceAll("<CREATED_OS>", os);

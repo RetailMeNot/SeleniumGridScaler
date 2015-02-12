@@ -37,4 +37,7 @@ public interface AutomationConstants {
     String AWS_DEFAULT_RESOURCE_NAME= "aws.properties.default";
     String REAPER_THREAD_CONFIG = "useReaperThread";
     String USER_DATA_PROVIDER = "userDataProvider";
+    String CHROME_THREAD_COUNT ="chromeThreadCount";
+    String FIREFOX_IE_THREAD_COUNT = "firefoxIEThreadCount";
+    
 }
