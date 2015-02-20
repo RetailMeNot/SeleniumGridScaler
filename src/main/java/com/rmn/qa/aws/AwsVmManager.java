@@ -41,7 +41,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
@@ -159,7 +158,7 @@ public class AwsVmManager implements VmManager {
             try {
                 properties.load(stream);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Could not load custom aws.properties", e);
             }
         }
         return properties;

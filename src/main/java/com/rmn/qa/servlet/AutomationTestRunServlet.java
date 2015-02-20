@@ -23,6 +23,7 @@ import com.rmn.qa.RegistryRetriever;
 import com.rmn.qa.NodesCouldNotBeStartedException;
 import com.rmn.qa.aws.AwsVmManager;
 import com.rmn.qa.aws.VmManager;
+import com.rmn.qa.task.AutomationAutoGridScalerTask;
 import com.rmn.qa.task.AutomationHubCleanupTask;
 import com.rmn.qa.task.AutomationNodeCleanupTask;
 import com.rmn.qa.task.AutomationNodeRegistryTask;
@@ -64,6 +65,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
     private static final long HUB_TERMINATION_POLLING_TIME_IN_MINUTES = 1L; // Look every minute to shutdown the hub
     private static final long NODE_REGISTRATION_POLLING_TIME_IN_MINUTES = 15L; // Look every 15 minutes for new unregistered nodes
     private static final long TEST_RUN_CLEANUP_POLLING_TIME_IN_SECONDS = 60L; // Look for runs to clean up every 60 seconds
+    private static final long AUTO_SCALING_TIME_IN_MINUTES = 5L; // Look every minute we we need to scale the number of nodes
 
     // We override these for unit testing
     private VmManager ec2;
@@ -89,6 +91,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
         setRequestMatcher(requestMatcher);
         // Start up our cleanup thread that will cleanup unused runs
         if(initThreads) {
+            log.info("Initializing cleanup threads");
             this.initCleanupThreads();
         }
     }
@@ -120,6 +123,13 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
                     AutomationTestRunServlet.HUB_TERMINATE_START_DELAY_IN_MINUTES,AutomationTestRunServlet.NODE_REGISTRATION_POLLING_TIME_IN_MINUTES, TimeUnit.MINUTES);
         } else {
             log.info("Reaper thread not running due to config flag.");
+        }
+        String autoScalerThread = System.getProperty(AutomationConstants.SCALER_THREAD_CONFIG);
+        if (Boolean.valueOf(autoScalerThread)) {
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new AutomationAutoGridScalerTask(this, ec2), AutomationTestRunServlet.HUB_TERMINATE_START_DELAY_IN_MINUTES, AutomationTestRunServlet.AUTO_SCALING_TIME_IN_MINUTES, TimeUnit.MINUTES);
+
+        } else {
+            log.info("Auto Scaler thread not running due to config flag.");
         }
     }
 
