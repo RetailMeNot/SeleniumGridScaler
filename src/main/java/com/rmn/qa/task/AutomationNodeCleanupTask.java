@@ -234,6 +234,8 @@ public class AutomationNodeCleanupTask extends AbstractAutomationCleanupTask {
                 return Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_FIREFOX_THRESHOLD));
             } else if (AutomationUtils.lowerCaseMatch(browser, "internetexplorer")) {
                 return Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_IE_THRESHOLD));
+            } else if (AutomationUtils.lowerCaseMatch(browser, BrowserType.PHANTOMJS)) {
+                return Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_PHANTOMJS_THRESHOLD));
             } else {
                 return 0;
             }

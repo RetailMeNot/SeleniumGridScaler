@@ -109,7 +109,9 @@ public class StatusServlet extends RegistryBasedServlet {
         int chromeThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null, BrowserType.CHROME));
         int firefoxThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null,BrowserType.FIREFOX));
         int ieThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(),new AutomationRunRequest(StatusServlet.class.getSimpleName(),null,"internetexplorer"));
-        builder.append("<H2>Free Threads - Chrome: ").append(chromeThreads).append(" Firefox: ").append(firefoxThreads).append(" IE: ").append(ieThreads).append("</H2>");
+        int phantomjsThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(), new AutomationRunRequest(StatusServlet.class.getSimpleName(), null, BrowserType.PHANTOMJS));
+        builder.append("<H2>Free Threads - Chrome: ").append(chromeThreads).append(" Firefox: ").append(firefoxThreads)
+                .append(" IE: ").append(ieThreads).append(" PhantomJS: ").append(phantomjsThreads).append("</H2>");
 
         for (RemoteProxy proxy : getRegistry().getAllProxies()) {
             StringBuilder localBuilder = new StringBuilder();

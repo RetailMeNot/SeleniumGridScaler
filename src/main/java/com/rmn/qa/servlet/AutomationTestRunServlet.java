@@ -275,6 +275,9 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
             int numThreadsPerMachine;
             if (AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser)) {
                 numThreadsPerMachine = Integer.parseInt((String) AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT));
+
+            } else if (AutomationUtils.lowerCaseMatch(BrowserType.PHANTOMJS, browser)) {
+                numThreadsPerMachine = Integer.parseInt((String) AwsVmManager.getAWSProperties().get(AutomationConstants.PHANTOMJS_THREAD_COUNT));
                 //TODO Browser Enum replacement here
             } else if (AutomationUtils.lowerCaseMatch(BrowserType.IE, browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser)) {
                 numThreadsPerMachine = Integer.parseInt((String) AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT));
@@ -314,7 +317,8 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
      * @return
      */
     private boolean browserSupportedByAmis(String browser) {
-        return AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser) || AutomationUtils.lowerCaseMatch("internetexplorer", browser);
+        return AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser) || AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser)
+                || AutomationUtils.lowerCaseMatch("internetexplorer", browser) || AutomationUtils.lowerCaseMatch(BrowserType.PHANTOMJS, browser);
     }
 
     @Override

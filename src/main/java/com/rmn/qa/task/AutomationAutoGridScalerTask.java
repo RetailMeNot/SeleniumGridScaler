@@ -38,28 +38,37 @@ public class AutomationAutoGridScalerTask extends AbstractAutomationCleanupTask 
         int freeChromeThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(), new AutomationRunRequest(AutomationAutoGridScalerTask.class.getSimpleName(), null, BrowserType.CHROME));
         int freeFirefoxThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(), new AutomationRunRequest(AutomationAutoGridScalerTask.class.getSimpleName(), null, BrowserType.FIREFOX));
         int freeIEThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(), new AutomationRunRequest(AutomationAutoGridScalerTask.class.getSimpleName(), null, "internetexplorer"));
+        int freePhantomjsThreads = requestMatcher.getNumFreeThreadsForParameters(getRegistry().getAllProxies(), new AutomationRunRequest(AutomationAutoGridScalerTask.class.getSimpleName(), null, BrowserType.PHANTOMJS));
 
+        
         int freeNodesChromeThreshold = Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_CHROME_THRESHOLD));
         int freeNodesFirefoxThreshold = Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_FIREFOX_THRESHOLD));
         int freeNodesIEThreshold = Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_IE_THRESHOLD));
+        int freeNodesPhantomjsThreshold = Integer.parseInt(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FREE_NODES_PHANTOMJS_THRESHOLD));
 
         // for each browser type check against the threshhold
         if (freeChromeThreads < freeNodesChromeThreshold) {
-            startNewNodes(2 * freeNodesChromeThreshold, BrowserType.CHROME);
+            startNewNodes(freeNodesChromeThreshold, BrowserType.CHROME);
         } else {
             log.info("Not starting new nodes for chrome since there are {}.", freeChromeThreads);
         }
 
         if (freeFirefoxThreads < freeNodesFirefoxThreshold) {
-            startNewNodes(2 * freeNodesFirefoxThreshold, BrowserType.FIREFOX);
+            startNewNodes(freeNodesFirefoxThreshold, BrowserType.FIREFOX);
         } else {
             log.info("Not starting new nodes for firefox since there are {}.", freeFirefoxThreads);
         }
 
         if (freeIEThreads < freeNodesIEThreshold) {
-            startNewNodes(2 * freeIEThreads, "internetexplorer");
+            startNewNodes(freeNodesIEThreshold, "internetexplorer");
         } else {
             log.info("Not starting new nodes for IE since there are {}.", freeNodesIEThreshold);
+        }
+
+        if (freePhantomjsThreads < freeNodesPhantomjsThreshold) {
+            startNewNodes(freeNodesPhantomjsThreshold, BrowserType.PHANTOMJS);
+        } else {
+            log.info("Not starting new nodes for PhamtomJS since there are {}.", freeNodesPhantomjsThreshold);
         }
 
     }

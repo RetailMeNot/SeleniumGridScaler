@@ -12,6 +12,12 @@
                 "maxInstances": <MAX_SESSION_CHROME>,
                 "instanceId": "<INSTANCE_ID>",
                 "seleniumProtocol": "WebDriver"
+            },
+            {
+                "browserName": "phantomjs",
+                "maxInstances": <MAX_SESSION_PHANTOMJS>,
+                "instanceId": "<INSTANCE_ID>",
+                "seleniumProtocol": "WebDriver"
             }
         ],
     "configuration":

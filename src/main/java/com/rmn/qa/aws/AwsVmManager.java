@@ -469,19 +469,28 @@ public class AwsVmManager implements VmManager {
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", "0");
         } else if (AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser)) {
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", "0");
         } else if (AutomationUtils.lowerCaseMatch(BrowserType.IE, browser)) {
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", "0");
+        } else if (AutomationUtils.lowerCaseMatch(BrowserType.PHANTOMJS, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.PHANTOMJS_THREAD_COUNT)));
         } else {
             // default
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
             nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.PHANTOMJS_THREAD_COUNT)));
         }
         nodeConfig = nodeConfig.replaceAll("<UUID>", uuid);
         nodeConfig = nodeConfig.replaceAll("<CREATED_BROWSER>", browser);
