@@ -1,32 +1,54 @@
 ########### Rename this file to 'aws.properties' to override default values
 
-region=east
+# Default region
+region=eu-west-1
 
 # Endpoints
-east_endpoint=https://us-east-1.ec2.amazonaws.com
-west_endpoint=https://us-west-1.ec2.amazonaws.com
-
+us-east-1_endpoint=https://us-east-1.ec2.amazonaws.com
+us-west-1_endpoint=https://us-west-1.ec2.amazonaws.com
+us-west-2_endpoint=https://ec2.us-west-2.amazonaws.com
+eu-west-1_endpoint=https://ec2.eu-west-1.amazonaws.com
+eu-central-1_endpoint=https://ec2.eu-central-1.amazonaws.com
+ap-southeast-2_endpoint=https://ec2.ap-southeast-2.amazonaws.com
+ap-northeast-1_endpoint=https://ec2.ap-northeast-1.amazonaws.com
+sa-east-1_endpoint=https://ec2.sa-east-1.amazonaws.com
 
 # Node AMI Info
-east_linux_node_ami=ami-d216a3ba
-node_instance_type_chrome=c3.large
-# Firefox and IE will only run in 1 browser per VM so we'll use micros for them
+us-east-1_linux_node_ami=ami-d216a3ba
+us-east-1_windows_node_ami=ami-dcd869b4
+eu-west-1_linux_node_ami=ami-274ecc50
+eu-west-1_windows_node_ami=ami-dcd869b4
+node_instance_type_chrome=t2.micro
 node_instance_type_firefox=t2.micro
 node_instance_type_internetexplorer=t2.micro
-east_windows_node_ami=ami-dcd869b4
+node_instance_type_phantomjs=t2.micro
+
 
 
 # Security Group Info
-# east_security_group=sg-00000000
+# us-east-1_security_group=sg-00000000
 # VPC Info
-# east_subnet_id=subnet-00000000
+# us-east-1_subnet_id=subnet-00000000
 # Fallback VPCs
-# east_subnet_fallback_id_1=subnet-11111111
-# east_subnet_fallback_id_2=subnet-22222222
-# east_subnet_fallback_id_3=subnet-33333333
+# us-east-1_subnet_fallback_id_1=subnet-11111111
+# us-east-1_subnet_fallback_id_2=subnet-22222222
+# us-east-1_subnet_fallback_id_3=subnet-33333333
 # Key
-#east_key_name=keyNameHere
+# us-east-1_key_name=keyNameHere
 # Tags to be used
 # tagProduct=Department,QA
 
+eu-west-1_subnet_id=subnet-211fb856
+eu-west-1_key_name=hseffler-keypair
 
+
+userDataProvider=script
+
+chromeThreadCount=1
+firefoxIEThreadCount=1
+phantomjsThreadCount=5
+
+freeNodesChromeThreshold=2
+freeNodesFirefoxThreshold=2
+freeNodesIEThreshold=0
+freeNodesPhantomjsThreshold=5

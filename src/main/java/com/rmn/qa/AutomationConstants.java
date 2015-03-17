@@ -36,4 +36,13 @@ public interface AutomationConstants {
     String AWS_PRIVATE_KEY="awsSecretKey";
     String AWS_DEFAULT_RESOURCE_NAME= "aws.properties.default";
     String REAPER_THREAD_CONFIG = "useReaperThread";
+    String SCALER_THREAD_CONFIG = "useScalerThread";
+    String USER_DATA_PROVIDER = "userDataProvider";
+    String CHROME_THREAD_COUNT = "chromeThreadCount";
+    String FIREFOX_IE_THREAD_COUNT = "firefoxIEThreadCount";
+    String PHANTOMJS_THREAD_COUNT = "phantomjsThreadCount";
+    String FREE_NODES_CHROME_THRESHOLD = "freeNodesChromeThreshold";
+    String FREE_NODES_FIREFOX_THRESHOLD = "freeNodesFirefoxThreshold";
+    String FREE_NODES_IE_THRESHOLD = "freeNodesIEThreshold";
+    String FREE_NODES_PHANTOMJS_THRESHOLD = "freeNodesPhantomjsThreshold";
 }

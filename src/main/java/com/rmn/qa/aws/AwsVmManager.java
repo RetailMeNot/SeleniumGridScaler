@@ -39,12 +39,22 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
@@ -61,8 +71,6 @@ public class AwsVmManager implements VmManager {
     private AmazonEC2Client client;
     BasicAWSCredentials credentials;
     private Properties awsProperties;
-    public static final int CHROME_THREAD_COUNT = 6;
-    public static final int FIREFOX_IE_THREAD_COUNT = 1;
 
     private String region;
 
@@ -71,27 +79,54 @@ public class AwsVmManager implements VmManager {
         NODE_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public AwsVmManager() {
-        // Default the the east region
-        this("east");
-    }
-
     /**
-     * Creates a new AwsVmManager instance
-     * @param region
+     * Creates a new AwsVMManager instance using the region from the properties
+     * file
      */
-    public AwsVmManager(String region) {
-        awsProperties = initAWSProperties();
+    public AwsVmManager() {
+        awsProperties = AwsVmManager.getAWSProperties();
         this.region = awsProperties.getProperty("region");
-        credentials = getCredentials();
-        client = new AmazonEC2Client(credentials);
+        /**
+         * By default we use the credentials provided in the configuration
+         * files. If there are none we fall back to IAM roles.
+         */
+        try {
+            credentials = getCredentials();
+            client = new AmazonEC2Client(credentials);
+        } catch (IllegalArgumentException e) {
+            client = new AmazonEC2Client();
+        }
         client.setEndpoint(awsProperties.getProperty(region + "_endpoint"));
     }
 
     /**
      * Creates a new AwsVmManager instance
-     * @param client {@link com.amazonaws.services.ec2.AmazonEC2Client Client} to use for AWS interaction
-     * @param properties {@link java.util.Properties Properties} to use for EC2 config loading
+     *
+     * @param region
+     */
+    public AwsVmManager(String region) {
+        awsProperties = AwsVmManager.getAWSProperties();
+        this.region = region;
+        /**
+         * By default we use the credentials provided in the configuration
+         * files. If there are none we fall back to IAM roles.
+         */
+        try {
+            credentials = getCredentials();
+            client = new AmazonEC2Client(credentials);
+        } catch (IllegalArgumentException e) {
+            client = new AmazonEC2Client();
+        }
+        client.setEndpoint(awsProperties.getProperty(region + "_endpoint"));
+    }
+
+    /**
+     * Creates a new AwsVmManager instance
+     *
+     * @param client {@link com.amazonaws.services.ec2.AmazonEC2Client Client}
+     * to use for AWS interaction
+     * @param properties {@link java.util.Properties Properties} to use for EC2
+     * config loading
      * @param region Region inside of AWS to use
      */
     public AwsVmManager(AmazonEC2Client client, Properties properties, String region) {
@@ -101,15 +136,16 @@ public class AwsVmManager implements VmManager {
     }
 
     /**
-     * Initializes the AWS properties from the default properties file.  Allows the user to override
-     * the default properties if desired
+     * Initializes the AWS properties from the default properties file. Allows
+     * the user to override the default properties if desired
+     *
      * @return
      */
-    Properties initAWSProperties() {
+    public static Properties getAWSProperties() {
         Properties properties = new Properties();
         String propertiesLocation = System.getProperty("propertyFileLocation");
         // If the user passed in an AWS config file, go ahead and use it instead of the default one
-        if(propertiesLocation != null) {
+        if (propertiesLocation != null) {
             File f = new File(propertiesLocation);
             try {
                 InputStream is = new FileInputStream(f);
@@ -122,71 +158,73 @@ public class AwsVmManager implements VmManager {
             try {
                 properties.load(stream);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Could not load custom aws.properties", e);
             }
         }
         return properties;
     }
 
     /**
-     * Retrieves AWS {@link com.amazonaws.auth.BasicAWSCredentials credentials} from the configuration file
+     * Retrieves AWS {@link com.amazonaws.auth.BasicAWSCredentials credentials}
+     * from the configuration file
+     *
      * @return
      */
     @VisibleForTesting
     BasicAWSCredentials getCredentials() {
         // Give the system property credentials precedence over ones found in the config file
         String accessKey = System.getProperty(AutomationConstants.AWS_ACCESS_KEY);
-        if(accessKey == null) {
+        if (accessKey == null) {
             accessKey = awsProperties.getProperty(AutomationConstants.AWS_ACCESS_KEY);
-            if(accessKey == null) {
+            if (accessKey == null) {
                 throw new IllegalArgumentException(String.format("AWS Access Key must be passed in by the [%s] system property or be present in the AWS config file", AutomationConstants.AWS_ACCESS_KEY));
             }
         }
         String privateKey = System.getProperty(AutomationConstants.AWS_PRIVATE_KEY);
-        if(privateKey == null) {
+        if (privateKey == null) {
             privateKey = awsProperties.getProperty(AutomationConstants.AWS_PRIVATE_KEY);
-            if(privateKey == null) {
+            if (privateKey == null) {
                 throw new IllegalArgumentException(String.format("AWS Private Key must be passed in by the [%s] system property or be present in the AWS config file", AutomationConstants.AWS_PRIVATE_KEY));
             }
         }
-        return new BasicAWSCredentials(accessKey,privateKey);
+        return new BasicAWSCredentials(accessKey, privateKey);
     }
 
-    public List<Instance> launchNodes(String amiId, String instanceType, int numberToStart, String userData, boolean terminateOnShutdown) throws NodesCouldNotBeStartedException{
+    public List<Instance> launchNodes(String amiId, String instanceType, int numberToStart, String userData, boolean terminateOnShutdown) throws NodesCouldNotBeStartedException {
         RunInstancesRequest runRequest = new RunInstancesRequest();
+        // TODO: move keypair config to config file!!!! pls!!!
         runRequest
                 .withImageId(amiId)
                 .withInstanceType(instanceType)
                 .withMinCount(numberToStart)
                 .withMaxCount(numberToStart)
-                .withUserData(userData)
-        ;
-        if(terminateOnShutdown) {
+                .withUserData(userData);
+        if (terminateOnShutdown) {
             runRequest.withInstanceInitiatedShutdownBehavior("terminate");
         }
         log.info("Setting image id: " + runRequest.getImageId());
         log.info("Setting instance type: " + runRequest.getInstanceType());
         String subnetKey = awsProperties.getProperty(region + "_subnet_id");
-        if(subnetKey != null) {
+        if (subnetKey != null) {
             log.info("Setting subnet: " + subnetKey);
             runRequest.withSubnetId(subnetKey);
         }
         String securityGroupKey = awsProperties.getProperty(region + "_security_group");
-        if(securityGroupKey != null) {
+        if (securityGroupKey != null) {
             log.info("Setting security group: " + securityGroupKey);
             runRequest.withSecurityGroupIds(securityGroupKey);
         }
         String keyName = awsProperties.getProperty(region + "_key_name");
-        if(keyName != null) {
+        if (keyName != null) {
             log.info("Setting keyname:" + keyName);
             runRequest.withKeyName(keyName);
         }
         log.info("Sending run request to AWS...");
-        RunInstancesResult runInstancesResult = getResults(runRequest,0);
+        RunInstancesResult runInstancesResult = getResults(runRequest, 0);
         log.info("Run request result returned.  Adding tags");
         //Tag the instances with the standard RMN AWS data
         List<Instance> instances = runInstancesResult.getReservation().getInstances();
-        if(instances.size() == 0) {
+        if (instances.isEmpty()) {
             throw new NodesCouldNotBeStartedException(String.format("Error starting up nodes -- count was zero and did not match expected count of %d", numberToStart));
         }
         associateTags(new Date().toString(), instances);
@@ -199,8 +237,8 @@ public class AwsVmManager implements VmManager {
     @Override
     public List<Instance> launchNodes(String uuid, String os, String browser, String hubHostName, int nodeCount, int maxSessions) throws NodesCouldNotBeStartedException {
         // Unspecified OS will default to Linux
-        if (null == os ) {
-            if(AutomationUtils.lowerCaseMatch(browser, "internet explorer")) {
+        if (null == os) {
+            if (AutomationUtils.lowerCaseMatch(browser, "internet explorer")) {
                 os = "windows";
             } else {
                 os = "linux";
@@ -209,12 +247,15 @@ public class AwsVmManager implements VmManager {
         String userData = getUserData(uuid, hubHostName, browser, os, maxSessions);
         String amiId = awsProperties.getProperty(getAmiIdForOs(os, browser));
         String instanceType = awsProperties.getProperty("node_instance_type_" + browser);
-        return this.launchNodes(amiId,instanceType,nodeCount,userData, false);
+        return this.launchNodes(amiId, instanceType, nodeCount, userData, false);
     }
 
     /**
-     * Attempts to run the {@link com.amazonaws.services.ec2.model.RunInstancesRequest RunInstancesRequest}, falling back on
-     * alternative subnets if capacity is full in the current region
+     * Attempts to run the
+     * {@link com.amazonaws.services.ec2.model.RunInstancesRequest RunInstancesRequest},
+     * falling back on alternative subnets if capacity is full in the current
+     * region
+     *
      * @param request
      * @param requestNumber
      * @return
@@ -222,24 +263,24 @@ public class AwsVmManager implements VmManager {
      */
     private RunInstancesResult getResults(RunInstancesRequest request, int requestNumber) throws NodesCouldNotBeStartedException {
         RunInstancesResult runInstancesResult;
-        try{
+        try {
             runInstancesResult = client.runInstances(request);
-        } catch(AmazonServiceException e) {
+        } catch (AmazonServiceException e) {
             // If there is insufficient capacity in this subnet / availability zone, then we want to try other configured subnets
-            if("InsufficientInstanceCapacity".equals(e.getErrorCode()) || "VolumeTypeNotAvailableInZone".equals(e.getErrorCode())) {
-                log.error(String.format("Insufficient capacity in subnet [%s]: %s",request.getSubnetId(), e));
+            if ("InsufficientInstanceCapacity".equals(e.getErrorCode()) || "VolumeTypeNotAvailableInZone".equals(e.getErrorCode())) {
+                log.error(String.format("Insufficient capacity in subnet [%s]: %s", request.getSubnetId(), e));
                 requestNumber = requestNumber + 1;
                 String fallBackSubnetId = awsProperties.getProperty(region + "_subnet_fallback_id_" + requestNumber);
                 // Make sure and only try to recursively loop so as long as we have a valid fallback subnet id.  Logic to also
                 // prevent an accidental infinite loop
-                if(fallBackSubnetId != null && requestNumber < 5) {
+                if (fallBackSubnetId != null && requestNumber < 5) {
                     log.info("Setting fallback subnet: " + fallBackSubnetId);
                     // Modify the original request with the new subnet ID we're trying to fallback on
                     request.withSubnetId(fallBackSubnetId);
                 } else {
                     throw new NodesCouldNotBeStartedException("Sufficient resources were not available in any of the availability zones");
                 }
-                return getResults(request,requestNumber);
+                return getResults(request, requestNumber);
             } else {
                 // We got an error other than insufficient capacity, and should just throw it for the caller to handle
                 throw e;
@@ -250,26 +291,28 @@ public class AwsVmManager implements VmManager {
 
     /**
      * Assigns the tags asynchronously to AWS
+     *
      * @param threadName
      * @param instances
      */
     @VisibleForTesting
     void associateTags(String threadName, Collection<Instance> instances) {
-        Thread reportThread = new AwsTagReporter(threadName, client,instances,awsProperties);
+        Thread reportThread = new AwsTagReporter(threadName, client, instances, awsProperties);
         reportThread.start();
     }
 
     /**
      * Gets the instance ID based on the OS that is chosen
+     *
      * @param os OS for the requested test run
      * @param browser Browser for the requested test run
      * @return
      */
     private String getAmiIdForOs(String os, String browser) {
         String requestedProperty;
-        if(os.equals("windows") || browser.equals(BrowserType.IE)) {
+        if (os.equals("windows") || browser.equals(BrowserType.IE)) {
             requestedProperty = region + "_windows_node_ami";
-        } else if(os.equals("linux")) {
+        } else if (os.equals("linux")) {
             requestedProperty = region + "_linux_node_ami";
         } else {
             throw new RuntimeException("Unsupported OS: " + os);
@@ -279,6 +322,7 @@ public class AwsVmManager implements VmManager {
 
     /**
      * Terminates the specified instance
+     *
      * @param instanceId Id of the instance to terminate
      */
     public boolean terminateInstance(String instanceId) {
@@ -287,17 +331,17 @@ public class AwsVmManager implements VmManager {
         TerminateInstancesResult result = client.terminateInstances(terminateRequest);
         List<InstanceStateChange> stateChanges = result.getTerminatingInstances();
         boolean terminatedInstance = false;
-        for(InstanceStateChange stateChange : stateChanges) {
-            if(instanceId.equals(stateChange.getInstanceId())) {
-                terminatedInstance=true;
+        for (InstanceStateChange stateChange : stateChanges) {
+            if (instanceId.equals(stateChange.getInstanceId())) {
+                terminatedInstance = true;
                 InstanceState currentState = stateChange.getCurrentState();
-                if(currentState.getCode() != 32 && currentState.getCode() != 48) {
+                if (currentState.getCode() != 32 && currentState.getCode() != 48) {
                     log.error(String.format("Machine state for id %s should be terminated (48) or shutting down (32) but was %s instead", instanceId, currentState.getCode()));
                     return false;
                 }
             }
         }
-        if(!terminatedInstance) {
+        if (!terminatedInstance) {
             log.error("Matching terminated instance was not found for instance " + instanceId);
             return false;
         }
@@ -310,60 +354,144 @@ public class AwsVmManager implements VmManager {
     }
 
     /**
-     * Returns a zip file containing the necessary user data for the images we're going to spin up
+     * Returns a zip file containing the necessary user data for the images
+     * we're going to spin up
+     *
      * @param uuid UUID of the test run
-     * @param hubHostName Resolvable host name of the hub the node will register with
+     * @param hubHostName Resolvable host name of the hub the node will register
+     * with
      * @param browser Browser for the requested test run
      * @param os OS for the requested test run
      * @param maxSessions Maximum simultaneous test sessions
      * @return
      */
     @VisibleForTesting
-    String getUserData(String uuid,String hubHostName, String browser, String os, int maxSessions) {
-        try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream();ZipOutputStream zos = new ZipOutputStream(outputStream);) {
-            // Pull the node config out so we can write it to the zip file
-            ZipEntry nodeConfigZipEntry = new ZipEntry("nodeConfigTemplate.json");
-            zos.putNextEntry(nodeConfigZipEntry);
-            String nodeConfigContents = getNodeConfig(uuid, hubHostName, browser, os, maxSessions);
-            zos.write(nodeConfigContents.getBytes());
-            zos.closeEntry();
+    String getUserData(String uuid, String hubHostName, String browser, String os, int maxSessions) {
+        String userDataProvider = awsProperties.getProperty(AutomationConstants.USER_DATA_PROVIDER, "zip");
+        if (userDataProvider.equals("zip")) {
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); ZipOutputStream zos = new ZipOutputStream(outputStream);) {
+                // Pull the node config out so we can write it to the zip file
+                ZipEntry nodeConfigZipEntry = new ZipEntry("nodeConfigTemplate.json");
+                zos.putNextEntry(nodeConfigZipEntry);
+                String nodeConfigContents = getNodeConfig(uuid, hubHostName, browser, os, maxSessions);
+                zos.write(nodeConfigContents.getBytes());
+                zos.closeEntry();
 
-            // Now pull out the S3 config file so we can include it in the zip
-            // that will be sent in as userdata
-            ZipEntry s3ZipEntry = new ZipEntry(".s3cfg");
-            zos.putNextEntry(s3ZipEntry);
+                // Now pull out the S3 config file so we can include it in the zip
+                // that will be sent in as userdata
+                ZipEntry s3ZipEntry = new ZipEntry(".s3cfg");
+                zos.putNextEntry(s3ZipEntry);
 
-            String s3Contents = getS3Config();
-            zos.write(s3Contents.getBytes());
-            zos.closeEntry();
-            // Make sure and close the zip before encoding it
-            zos.close();
-            return new String(Base64.encodeBase64(outputStream.toByteArray()));
+                String s3Contents = getS3Config();
+                zos.write(s3Contents.getBytes());
+                zos.closeEntry();
+                // Make sure and close the zip before encoding it
+                zos.close();
+                return new String(Base64.encodeBase64(outputStream.toByteArray()));
 
-        }catch(IOException ex){
-            throw new RuntimeException("Error getting user data",ex);
+            } catch (IOException ex) {
+                throw new RuntimeException("Error getting user data", ex);
+            }
+        } else if (userDataProvider.equals("script")) {
+            try {
+                // read script template and replacements
+                Map<String, String> env = new HashMap<>();
+                env.put("create", "true");
+                URI uri = ClassLoader.getSystemResource("UserDataScript.sh.template").toURI();
+                try {
+                    FileSystem zipfs = FileSystems.newFileSystem(uri, env);
+                } catch (FileSystemAlreadyExistsException e) {
+                    // well, fine I guess
+                }
+                List<String> userDataTemplate = Files.readAllLines(Paths.get(uri),
+                        StandardCharsets.UTF_8);
+                uri = ClassLoader.getSystemResource("UserDataScript.sh.variables").toURI();
+                // zipfs = FileSystems.newFileSystem(uri, env);
+                List<String> userDataVariables = Files.readAllLines(Paths.get(uri),
+                        StandardCharsets.UTF_8);
+
+                // replace configuration placeholders
+                StringBuffer result = new StringBuffer();
+                String nodeConfigContents = getNodeConfig(uuid, hubHostName, browser, os, maxSessions);
+                for (String userDataTemplateLine : userDataTemplate) {
+                    userDataTemplateLine = userDataTemplateLine.replaceAll("<NODE_CONFIG>", nodeConfigContents);
+                    for (String userDataVariableLine : userDataVariables) {
+                        String key;
+                        String value;
+                        if (userDataVariableLine.startsWith("#")) {
+                            continue;
+                        } else {
+                            String[] lineArray = userDataVariableLine.split("=");
+                            key = lineArray[0];
+                            key = key.replaceAll("_" + browser, "");
+                            key = key.replaceAll("_" + os, "");
+                            if (lineArray.length > 1) {
+                                value = userDataVariableLine.split("=")[1];
+                            } else {
+                                value = "";
+                            }
+                        }
+                        userDataTemplateLine = userDataTemplateLine.replaceAll("<" + key + ">", value);
+                    }
+                    result.append(userDataTemplateLine + "\n");
+                }
+
+                // write out into base 64 
+                log.info("User data used for instance startup: " + result.toString());
+                return new String(Base64.encodeBase64(result.toString().getBytes()));
+            } catch (IOException | URISyntaxException ex) {
+                throw new RuntimeException("Error getting user data", ex);
+            }
+        } else {
+            throw new RuntimeException("Error getting user data. " + AutomationConstants.USER_DATA_PROVIDER + " " + userDataProvider + "is unknown.");
         }
     }
 
     /**
-     * Reads the hub.json file and returns its contents as a Base64-encoded string
+     * Reads the hub.json file and returns its contents as a Base64-encoded
+     * string
+     *
      * @return
      */
     @VisibleForTesting
-    String getNodeConfig(String uuid,String hostName, String browser, String os, int maxSessions) {
+    String getNodeConfig(String uuid, String hostName, String browser, String os, int maxSessions) {
         String resourceName;
-        if(os.equals("windows")) {
+        if (os.equals("windows")) {
             resourceName = AutomationConstants.WINDOWS_PROPERTY_NAME;
-        } else if(os.equals("linux")) {
+        } else if (os.equals("linux")) {
             resourceName = AutomationConstants.LINUX_PROPERTY_NAME;
         } else {
             throw new RuntimeException("Unexpected OS for prop config: " + os);
         }
         String nodeConfig = getFileContents(resourceName);
         nodeConfig = nodeConfig.replaceAll("<MAX_SESSION>", String.valueOf(maxSessions));
-        nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.FIREFOX_IE_THREAD_COUNT));
-        nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.FIREFOX_IE_THREAD_COUNT));
-        nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.CHROME_THREAD_COUNT));
+        if (AutomationUtils.lowerCaseMatch(BrowserType.CHROME, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", "0");
+        } else if (AutomationUtils.lowerCaseMatch(BrowserType.FIREFOX, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", "0");
+        } else if (AutomationUtils.lowerCaseMatch(BrowserType.IE, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", "0");
+        } else if (AutomationUtils.lowerCaseMatch(BrowserType.PHANTOMJS, browser)) {
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", "0");
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.PHANTOMJS_THREAD_COUNT)));
+        } else {
+            // default
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_FIREFOX>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_IE>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_CHROME>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.CHROME_THREAD_COUNT)));
+            nodeConfig = nodeConfig.replaceAll("<MAX_SESSION_PHANTOMJS>", String.valueOf(AwsVmManager.getAWSProperties().get(AutomationConstants.PHANTOMJS_THREAD_COUNT)));
+        }
         nodeConfig = nodeConfig.replaceAll("<UUID>", uuid);
         nodeConfig = nodeConfig.replaceAll("<CREATED_BROWSER>", browser);
         nodeConfig = nodeConfig.replaceAll("<CREATED_OS>", os);
@@ -376,18 +504,22 @@ public class AwsVmManager implements VmManager {
 
     /**
      * Returns the S3 config file replaced with the appropriate AWS key/secret
+     *
      * @return
      */
     @VisibleForTesting
     String getS3Config() {
         String s3Config = getFileContents(".s3cfg");
-        s3Config = s3Config.replaceAll("<ACCESS_KEY>",credentials.getAWSAccessKeyId());
-        s3Config = s3Config.replaceAll("<SECRET_KEY>",credentials.getAWSSecretKey());
+        if (credentials != null) {
+            s3Config = s3Config.replaceAll("<ACCESS_KEY>", credentials.getAWSAccessKeyId());
+            s3Config = s3Config.replaceAll("<SECRET_KEY>", credentials.getAWSSecretKey());
+        }
         return s3Config;
     }
 
     /**
      * Returns the contents of the specified resource as a string
+     *
      * @param resourceName
      * @return
      */
@@ -397,7 +529,7 @@ public class AwsVmManager implements VmManager {
             InputStream stream = AwsVmManager.class.getClassLoader().getResourceAsStream(resourceName);
             BufferedReader br = new BufferedReader(new InputStreamReader(stream));
             String strLine;
-            while ( ( strLine = br.readLine() ) != null )   {
+            while ((strLine = br.readLine()) != null) {
                 fileContents += strLine + "\n";
             }
             stream.close();

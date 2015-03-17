@@ -31,6 +31,7 @@ public class AutomationReaperTask extends AbstractAutomationCleanupTask {
         super(registryRetriever);
         this.ec2 = ec2;
     }
+    
     @Override
     public void doWork() {
         log.info("Running " + AutomationReaperTask.NAME);

@@ -87,7 +87,6 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>1.7.1</version>
                 <configuration>
-                    <finalName>automation-grid</finalName>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <filters>
                         <filter>

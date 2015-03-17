@@ -354,7 +354,7 @@ public class VmManagerTest {
         path.replace("/", File.separator);
         System.setProperty("propertyFileLocation",path);
         MockManageVm manageEC2 = new MockManageVm(null,null,null);
-        Properties retrievedProperties = manageEC2.initAWSProperties();
+        Properties retrievedProperties = manageEC2.getAWSProperties();
         File f = new File(path);
         Properties compareProperties = new Properties();
         try {
@@ -373,7 +373,7 @@ public class VmManagerTest {
         MockManageVm manageEC2 = new MockManageVm(null,null,null);
         try{
 
-            manageEC2.initAWSProperties();
+            manageEC2.getAWSProperties();
         } catch(RuntimeException e) {
             Assert.assertEquals("Could not load custom aws.properties",e.getMessage());
             return;
@@ -384,31 +384,35 @@ public class VmManagerTest {
     @Test
     // Test that the correct node config file is generated for a windows os
     public void testGetNodeConfigWindows() {
-        MockManageVm manageEC2 = new MockManageVm(null,null,null);
-        String uuid="uuid",hostName="hostName",browser="chrome",os="windows";
+        String path = "src/main/resources/" + AutomationConstants.AWS_DEFAULT_RESOURCE_NAME;
+        System.setProperty("propertyFileLocation", path);
+        MockManageVm manageEC2 = new MockManageVm(null, null, null);
+        String uuid = "uuid", hostName = "hostName", browser = "chrome", os = "windows";
         int maxSessions = 5;
-        String nodeConfig = manageEC2.getNodeConfig(uuid,hostName,browser,os,maxSessions);
-        Assert.assertTrue("Max sessions should have been passed in",nodeConfig.contains(String.valueOf(maxSessions)));
-        Assert.assertTrue("UUID should have been passed in",nodeConfig.contains(uuid));
-        Assert.assertTrue("Browser should have been passed in",nodeConfig.contains(browser));
-        Assert.assertTrue("OS should have been passed in",nodeConfig.contains(os));
-        Assert.assertTrue("Host name should have been passed in",nodeConfig.contains(hostName));
-        Assert.assertTrue("IE thread count should have been passed in", nodeConfig.contains(String.valueOf(AwsVmManager.FIREFOX_IE_THREAD_COUNT)));
+        String nodeConfig = manageEC2.getNodeConfig(uuid, hostName, browser, os, maxSessions);
+        Assert.assertTrue("Max sessions should have been passed in", nodeConfig.contains(String.valueOf(maxSessions)));
+        Assert.assertTrue("UUID should have been passed in", nodeConfig.contains(uuid));
+        Assert.assertTrue("Browser should have been passed in", nodeConfig.contains(browser));
+        Assert.assertTrue("OS should have been passed in", nodeConfig.contains(os));
+        Assert.assertTrue("Host name should have been passed in", nodeConfig.contains(hostName));
+        Assert.assertTrue("IE thread count should have been passed in", nodeConfig.contains(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.FIREFOX_IE_THREAD_COUNT)));
     }
 
     @Test
     // Test that the correct node config file is generated for a linux os
     public void testGetNodeConfigLinux() {
-        MockManageVm manageEC2 = new MockManageVm(null,null,null);
-        String uuid="uuid",hostName="hostName",browser="chrome",os="linux";
+        String path = "src/main/resources/" + AutomationConstants.AWS_DEFAULT_RESOURCE_NAME;
+        System.setProperty("propertyFileLocation", path);
+        MockManageVm manageEC2 = new MockManageVm(null, null, null);
+        String uuid = "uuid", hostName = "hostName", browser = "chrome", os = "linux";
         int maxSessions = 5;
-        String nodeConfig = manageEC2.getNodeConfig(uuid,hostName,browser,os,maxSessions);
-        Assert.assertTrue("Max sessions should have been passed in",nodeConfig.contains(String.valueOf(maxSessions)));
-        Assert.assertTrue("UUID should have been passed in",nodeConfig.contains(uuid));
-        Assert.assertTrue("Browser should have been passed in",nodeConfig.contains(browser));
-        Assert.assertTrue("OS should have been passed in",nodeConfig.contains(os));
-        Assert.assertTrue("Host name should have been passed in",nodeConfig.contains(hostName));
-        Assert.assertTrue("IE thread count should have been passed in", nodeConfig.contains(String.valueOf(AwsVmManager.CHROME_THREAD_COUNT)));
+        String nodeConfig = manageEC2.getNodeConfig(uuid, hostName, browser, os, maxSessions);
+        Assert.assertTrue("Max sessions should have been passed in", nodeConfig.contains(String.valueOf(maxSessions)));
+        Assert.assertTrue("UUID should have been passed in", nodeConfig.contains(uuid));
+        Assert.assertTrue("Browser should have been passed in", nodeConfig.contains(browser));
+        Assert.assertTrue("OS should have been passed in", nodeConfig.contains(os));
+        Assert.assertTrue("Host name should have been passed in", nodeConfig.contains(hostName));
+        Assert.assertTrue("Chrome thread count should have been passed in", nodeConfig.contains(AwsVmManager.getAWSProperties().getProperty(AutomationConstants.CHROME_THREAD_COUNT)));
     }
 
     @Test

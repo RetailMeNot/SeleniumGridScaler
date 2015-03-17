@@ -124,6 +124,10 @@ public class AwsTagReporter extends Thread {
         Tag nodeTag = new Tag("LaunchSource","SeleniumGridScalerPlugin");
         log.info("Adding hard-coded tag: " + nodeTag);
         tags.add(nodeTag);
+        // Name the instances
+        nodeTag = new Tag("Name","Selenium node " + instanceId);
+        log.info("Adding hard-coded tag: " + nodeTag);
+        tags.add(nodeTag);
         CreateTagsRequest ctr = new CreateTagsRequest(Arrays.asList(instanceId),tags);
         ec2Client.createTags(ctr);
     }

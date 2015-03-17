@@ -30,9 +30,8 @@ The -hubConfig configuration key and value are optional to specify Selenium Hub 
 
  System properties
 
-
-* awsAccessKey (required) - This should be the Access Key ID for your AWS account
-* awsSecretKey (required) - This should be the Secret Key for your AWS account.
+* awsAccessKey (most likely required) - This should be the Access Key ID for your AWS account. If not set permissions are derived from IAM role.
+* awsSecretKey (most likely required) - This should be the Secret Key for your AWS account. If not set permissions are derived from IAM role.
 * ipAddress (required) - Resolvable host name or ip address of the hub for started nodes to connect to.  Note 'localhost' or '127.0.0.1' will not work as this will not be resolvable from the context of another machine
 * totalNodeCount - Maximum number of nodes that can connect to your hub.  Defaults to 150 if not specified
 * extraCapabilities - CSV list of capabilities you want to be considered if specified client side (e.g. adding 'target' to this list will require any capabilities coming in with the 'target' key present to match the value in the node config)
@@ -78,6 +77,14 @@ Note that the test run UUID used in the API call above must be passed in via a d
 
 ## Selenium Configuration
 Note that on top of the SeleniumGridScaler configuration, you can use all existing configurations for Selenium.  Available selenium configurations values can be found [here](https://code.google.com/p/selenium/source/browse/java/server/src/org/openqa/grid/common/defaults/GridParameters.properties) and an example of passing them in can be seen in the **Running Your Tests** section above
+
+## User Data Generation
+When the GridScaler launches an instance it injects so called user data. This data is used for the initial configuration and setup. Two modes for doing this are currently implemented.
+
+* **zip** Generates a zip file which contains nodeConfigTemplate.json and a .s3cfg which can be used on the node to create the configuration.
+
+* **script** Injects a shell-script into user-data which is run upon bootup. Placeholders in the script are replaced by variables from an extra file to customize the script. The script template is called UserDataScript.sh.template and the file for placeholders is called UserDataScript.sh.variables.
+
 
 ## Test Access
 If you're trying to test against a website thats not publicly available on the internet, such as a private testing environment behind a firewall, you will need to setup up some sort of solution to allow your nodes have to access your test environment(s).  Two ways of granting access have been included below.

@@ -1,2 +1,3 @@
+#!/bin/sh
 java -DPOOL_MAX=1024 -DawsAccessKey=foo -DawsSecretKey=bar -DtotalNodeCount=300 -DipAddress="10.10.10.10" -cp target/automation-grid.jar org.openqa.grid.selenium.GridLauncher -role hub -hubConfig src/main/resources/hub.static.json -log grid.log -jettyMaxThreads 1024
 
