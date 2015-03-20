@@ -43,6 +43,7 @@ public class VmManagerTest {
     public void clear() {
         System.clearProperty(AutomationConstants.AWS_ACCESS_KEY);
         System.clearProperty(AutomationConstants.AWS_PRIVATE_KEY);
+        System.clearProperty("propertyFileLocation");
     }
 
     @Test
