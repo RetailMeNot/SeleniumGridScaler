@@ -1,3 +1,26 @@
-#!/bin/sh
-java -DPOOL_MAX=1024 -DawsAccessKey=foo -DawsSecretKey=bar -DtotalNodeCount=300 -DipAddress="10.10.10.10" -cp target/automation-grid.jar org.openqa.grid.selenium.GridLauncher -role hub -hubConfig src/main/resources/hub.static.json -log grid.log -jettyMaxThreads 1024
+# check required params
+[ -z ${AWS_ACCESS_KEY} ] && echo "AWS_ACCESS_KEY MUST BE SET!" && exit 1
+[ -z ${AWS_SECRET_KEY} ] && echo "AWS_SECRET_KEY MUST BE SET!" && exit 1
+
+# set defaults
+[ -z ${IP_ADDRESS} ] && IP_ADDRESS=10.10.10.10
+
+java -DawsAccessKey="${AWS_ACCESS_KEY}" \
+    -DawsSecretKey="${AWS_SECRET_KEY}" \
+    -DipAddress="${IP_ADDRESS}" \
+    -cp /target/automation-grid.jar org.openqa.grid.selenium.GridLauncher \
+    -role hub \
+    -servlets "com.rmn.qa.servlet.AutomationTestRunServlet","com.rmn.qa.servlet.StatusServlet"
+
+
+
+#-DPOOL_MAX=1024 
+#-DawsAccessKey=foo 
+#-DawsSecretKey=bar 
+#-DtotalNodeCount=300 
+#-DipAddress="10.10.10.10" 
+#-hubConfig src/main/resources/hub.static.json 
+#-log grid.log 
+#-jettyMaxThreads 1024
+
 

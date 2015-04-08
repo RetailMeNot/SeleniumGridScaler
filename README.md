@@ -25,6 +25,19 @@ Download the automation-grid jar file. To start up the hub process, start the ja
 
 The -hubConfig configuration key and value are optional to specify Selenium Hub configuration information.  Please see the 'Selenium Configuration' section below for more information.  After starting the hub process, you should be able to run your tests against the hub in the **Running Your Tests** section below
 
+## Installation/Startup w/Docker
+Clone source code repository, and build target jars with:
+
+    mvn install
+
+After building target jars, build docker image:
+
+    docker build -t selenium-grid-ec2
+
+After the docker image has been built, you can start a new docker container with it:
+
+    docker run -d -p 4444:4444 -e AWS_ACCESS_KEY={REPLACE_WITH_YOUR_KEY} -e AWS_SECRET_KEY={REPLACE_WITH_SECRET_KEY selenium-grid-ec2
+
 ## Startup Configuration
  Certain configuration values can be passed in to change the default behavior of SeleniumGridScaler
 
