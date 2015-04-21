@@ -88,16 +88,6 @@ public class AwsVmManager implements VmManager {
     public AwsVmManager() {
         awsProperties = initAWSProperties();
         this.region = awsProperties.getProperty("region");
-    }
-
-    /**
-     * Creates a new AwsVmManager instance.
-     *
-     * @param  region
-     */
-    public AwsVmManager(final String region) {
-        awsProperties = initAWSProperties();
-        this.region = region;
         /**
          * By default we use the credentials provided in the configuration files.
          * If there are none we fall back to IAM roles.
