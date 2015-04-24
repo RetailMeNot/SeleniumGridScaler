@@ -262,6 +262,9 @@ public class AwsVmManager implements VmManager {
         throws NodesCouldNotBeStartedException {
         RunInstancesResult runInstancesResult;
         try {
+            if(client == null){
+                throw new RuntimeException("The client is not initialized");
+            }
             runInstancesResult = client.runInstances(request);
         } catch (AmazonServiceException e) {
 
@@ -340,6 +343,9 @@ public class AwsVmManager implements VmManager {
         TerminateInstancesRequest terminateRequest = new TerminateInstancesRequest();
         terminateRequest.withInstanceIds(instanceId);
 
+        if(client == null){
+            throw new RuntimeException("The client is not initialized");
+        }
         TerminateInstancesResult result = client.terminateInstances(terminateRequest);
         List<InstanceStateChange> stateChanges = result.getTerminatingInstances();
         boolean terminatedInstance = false;
