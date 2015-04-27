@@ -557,4 +557,36 @@ public class VmManagerTest {
         Assert.fail("Call should fail due to insufficient resources");
     }
 
+    @Test
+    //Tests that the client is initialized and exception is not thrown
+    public void testClientInitialized(){
+        AwsVmManager manageEC2 = new AwsVmManager();
+        String region = "east";
+        try{
+            manageEC2.launchNodes("foo", "bar", 4, "userData", false);
+        } catch(Exception e) {
+            Assert.assertFalse("The client should be initialized",e.getMessage().contains("The client is not initialized"));
+        }
+    }
+
+    @Test
+    //Tests that if the client is not initialized, an exception with appropriate message is thrown
+    public void testClientNotInitializedError(){
+        String accessKey = "foo",privateKey = "bar";
+        Properties properties = new Properties();
+        properties.setProperty(AutomationConstants.AWS_ACCESS_KEY,accessKey);
+        properties.setProperty(AutomationConstants.AWS_PRIVATE_KEY,privateKey);
+        String region = "east";
+
+        AwsVmManager manageEC2 = new AwsVmManager(null,properties,region);
+
+        try{
+            manageEC2.launchNodes("foo", "bar", 3, "userData", false);
+        } catch(Exception e) {
+            Assert.assertTrue("The client should be initialized", e.getMessage().contains("The client is not initialized"));
+            return;
+        }
+        Assert.fail("Exception should have been thrown for client not initialized");
+    }
+
 }

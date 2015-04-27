@@ -88,16 +88,6 @@ public class AwsVmManager implements VmManager {
     public AwsVmManager() {
         awsProperties = initAWSProperties();
         this.region = awsProperties.getProperty("region");
-    }
-
-    /**
-     * Creates a new AwsVmManager instance.
-     *
-     * @param  region
-     */
-    public AwsVmManager(final String region) {
-        awsProperties = initAWSProperties();
-        this.region = region;
         /**
          * By default we use the credentials provided in the configuration files.
          * If there are none we fall back to IAM roles.
@@ -272,6 +262,9 @@ public class AwsVmManager implements VmManager {
         throws NodesCouldNotBeStartedException {
         RunInstancesResult runInstancesResult;
         try {
+            if(client == null){
+                throw new RuntimeException("The client is not initialized");
+            }
             runInstancesResult = client.runInstances(request);
         } catch (AmazonServiceException e) {
 
@@ -350,6 +343,9 @@ public class AwsVmManager implements VmManager {
         TerminateInstancesRequest terminateRequest = new TerminateInstancesRequest();
         terminateRequest.withInstanceIds(instanceId);
 
+        if(client == null){
+            throw new RuntimeException("The client is not initialized");
+        }
         TerminateInstancesResult result = client.terminateInstances(terminateRequest);
         List<InstanceStateChange> stateChanges = result.getTerminatingInstances();
         boolean terminatedInstance = false;
