@@ -194,15 +194,16 @@ public class AwsVmManager implements VmManager {
 
         String securityGroupKey = awsProperties.getProperty(region + "_security_group");
         if (securityGroupKey != null) {
-            log.info("Setting security group: " + securityGroupKey);
 
             String[] splitSecurityGroupdIds = securityGroupKey.split(",");
 
-            List aryLst = new ArrayList();
+            List securityGroupIdsAryLst = new ArrayList();
             for (int i = 0; i < splitSecurityGroupdIds.length; i++) {
-                aryLst.add(splitSecurityGroupdIds[i]);
+
+                log.info("Setting security group(s): " + splitSecurityGroupdIds[i]);
+                securityGroupIdsAryLst.add(splitSecurityGroupdIds[i]);
             }
-            runRequest.setSecurityGroupIds(aryLst);
+            runRequest.setSecurityGroupIds(securityGroupIdsAryLst);
         }
 
         String keyName = awsProperties.getProperty(region + "_key_name");
