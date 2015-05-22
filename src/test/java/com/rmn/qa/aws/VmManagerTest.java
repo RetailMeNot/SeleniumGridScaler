@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -170,6 +171,41 @@ public class VmManagerTest {
         Assert.assertEquals("Only one security group should be set", securityGroup, securityGroups.get(0));
         Assert.assertEquals("Subnet ids should match", subnetId, request.getSubnetId());
         Assert.assertEquals("Key names should match", keyName, request.getKeyName());
+    }
+
+    @Test
+    // Test if multiple security groups can be passed when launching a node
+    public void testLaunchNodesMultipleSecurityGroups()  throws NodesCouldNotBeStartedException {
+        MockAmazonEc2Client client = new MockAmazonEc2Client(null);
+        RunInstancesResult runInstancesResult = new RunInstancesResult();
+        Reservation reservation = new Reservation();
+        reservation.setInstances(Arrays.asList(new Instance()));
+        runInstancesResult.setReservation(reservation);
+        client.setRunInstances(runInstancesResult);
+        Properties properties = new Properties();
+        String region = "east", uuid="uuid",browser="chrome",os=null;
+        Integer threadCount = 5,maxSessions=5;
+        MockManageVm manageEC2 = new MockManageVm(client,properties,region);
+        String userData = "userData";
+        String securityGroup="securityGroup1,securityGroup2,securityGroup3",subnetId="subnetId",keyName="keyName",linuxImage="linuxImage";
+        String[] splitSecurityGroupdIds = securityGroup.split(",");
+        List securityGroupIdsAryLst = new ArrayList();
+
+        if (securityGroup != null) {
+            for (int i = 0; i < splitSecurityGroupdIds.length; i++) {
+                securityGroupIdsAryLst.add(splitSecurityGroupdIds[i]);
+            }
+        }
+        properties.setProperty(region + "_security_group",securityGroup);
+        properties.setProperty(region + "_subnet_id",subnetId);
+        properties.setProperty(region + "_key_name", keyName);
+        properties.setProperty(region + "_linux_node_ami", linuxImage);
+        manageEC2.setUserData(userData);
+        manageEC2.launchNodes(uuid,os,browser,null,threadCount,maxSessions);
+        RunInstancesRequest request = client.getRunInstancesRequest();
+        request.setSecurityGroupIds(securityGroupIdsAryLst);
+        List<String> securityGroups = request.getSecurityGroupIds();
+        Assert.assertEquals("More than 1 security group should be set",3,securityGroups.size());
     }
 
     @Test
