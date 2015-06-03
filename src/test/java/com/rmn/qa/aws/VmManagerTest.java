@@ -205,6 +205,13 @@ public class VmManagerTest {
         RunInstancesRequest request = client.getRunInstancesRequest();
         request.setSecurityGroupIds(securityGroupIdsAryLst);
         List<String> securityGroups = request.getSecurityGroupIds();
+        List<String> expectedSecurityGroups = Arrays.asList("securityGroup1,securityGroup2,securityGroup3".split(","));
+        Assert.assertTrue("Security groups should match all given security groups", securityGroups.containsAll(expectedSecurityGroups));
+
+        List<String> invalidSecurityGroups = Arrays.asList("securityGroup1,securityGroup2,securityGroup7".split(","));
+        Assert.assertFalse("Security groups should match only the set security groups", securityGroups.containsAll(invalidSecurityGroups));
+
+        Assert.assertFalse("Security group should not be empty", request.getSecurityGroupIds().isEmpty());
         Assert.assertEquals("More than 1 security group should be set",3,securityGroups.size());
     }
 
