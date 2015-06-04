@@ -22,12 +22,7 @@ import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -199,8 +194,16 @@ public class AwsVmManager implements VmManager {
 
         String securityGroupKey = awsProperties.getProperty(region + "_security_group");
         if (securityGroupKey != null) {
-            log.info("Setting security group: " + securityGroupKey);
-            runRequest.withSecurityGroupIds(securityGroupKey);
+
+            String[] splitSecurityGroupdIds = securityGroupKey.split(",");
+
+            List securityGroupIdsAryLst = new ArrayList();
+            for (int i = 0; i < splitSecurityGroupdIds.length; i++) {
+
+                log.info("Setting security group(s): " + splitSecurityGroupdIds[i]);
+                securityGroupIdsAryLst.add(splitSecurityGroupdIds[i]);
+            }
+            runRequest.setSecurityGroupIds(securityGroupIdsAryLst);
         }
 
         String keyName = awsProperties.getProperty(region + "_key_name");
