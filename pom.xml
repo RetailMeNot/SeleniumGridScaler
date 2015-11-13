@@ -26,12 +26,12 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-server</artifactId>
-            <version>2.42.2</version>
+            <version>2.48.2</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.8.0</version>
+            <version>1.9.20.1</version>
             <exclusions>
                 <!-- Exclusion required for dependency conflict with org.apache.httpcomponents from selenium-server -->
                 <exclusion>
