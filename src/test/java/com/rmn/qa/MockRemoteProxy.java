@@ -12,7 +12,8 @@
 
 package com.rmn.qa;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.common.exception.GridException;
 import org.openqa.grid.internal.Registry;
@@ -136,7 +137,7 @@ public class MockRemoteProxy implements RemoteProxy {
     }
 
     @Override
-    public JSONObject getStatus() throws GridException {
+    public JsonObject getStatus() throws GridException {
         return null;
     }
 
