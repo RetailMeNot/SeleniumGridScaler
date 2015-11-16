@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.9.20.1</version>
+            <version>1.8.0</version>
             <exclusions>
                 <!-- Exclusion required for dependency conflict with org.apache.httpcomponents from selenium-server -->
                 <exclusion>
