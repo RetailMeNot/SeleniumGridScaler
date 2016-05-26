@@ -42,7 +42,7 @@ public class AutomationCapabilityMatcherTest {
         AutomationCapabilityMatcher matcher = new AutomationCapabilityMatcher();
         Map<String,Object> nodeCapability = new HashMap<String,Object>();
         nodeCapability.put(CapabilityType.BROWSER_NAME,"firefox");
-        nodeCapability.put(AutomationConstants.INSTANCE_ID,"foo");
+        nodeCapability.put(AutomationConstants.INSTANCE_ID,"foobar");
         Map<String,Object> testCapability = new HashMap<String,Object>();
         testCapability.put(CapabilityType.BROWSER_NAME,"firefox");
         AutomationDynamicNode node = new AutomationDynamicNode("uuid","id","browser","os", new Date(),10);
