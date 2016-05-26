@@ -15,10 +15,10 @@ sa-east-1_endpoint=https://ec2.sa-east-1.amazonaws.com
 
 # Node AMI Info
 us-east-1_linux_node_ami=ami-d216a3ba
-node_instance_type_chrome=c3.large
+node_instance_type_chrome=c4.large
 # Firefox and IE will only run in 1 browser per VM so we'll use micros for them
-node_instance_type_firefox=t2.micro
-node_instance_type_internetexplorer=t2.micro
+node_instance_type_firefox=t2.small
+node_instance_type_internetexplorer=t2.small
 us-east-1_windows_node_ami=ami-dcd869b4
 
 

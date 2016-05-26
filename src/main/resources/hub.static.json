@@ -6,6 +6,7 @@
   "throwOnCapabilityNotPresent": false,
   "nodePolling": 5000,
   "unregisterIfStillDownAfter": 5000,
+  "nodeStatusCheckTimeout": 3000,
   "cleanUpCycle": 5000,
   "timeout": 80000,
   "servlets": ["com.rmn.qa.servlet.AutomationTestRunServlet","com.rmn.qa.servlet.StatusServlet"],

@@ -224,7 +224,7 @@ public class AutomationNodeCleanupTask extends AbstractAutomationCleanupTask {
                     log.info(String.format("Tests are not in progress. Node: %s Request: %s Free Slots: %s Node Slots: %s",node.getInstanceId(),request,freeSlotsForBrowser,finalNum));
                 }
             } else {
-                log.info(String.format("Load suitable for Request [%s].  Free slots [%s] Node slots [%s]",request,freeSlotsForBrowser,finalNum));
+                log.info(String.format("Load suitable for node shutdown. Request [%s]. Node [%s] Free slots [%s] Node slots [%s]",request, node, freeSlotsForBrowser,finalNum));
             }
         }
         // If we iterated over every browser for the node and load was not heavy enough, we can safely shut this node down

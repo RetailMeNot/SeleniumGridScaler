@@ -1,10 +1,13 @@
 package com.rmn.qa.task;
 
 import java.util.Date;
+import java.util.List;
 
 import org.openqa.grid.internal.ProxySet;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import com.beust.jcommander.internal.Lists;
 import com.rmn.qa.MockVmManager;
 import com.rmn.qa.NodesCouldNotBeStartedException;
 import com.rmn.qa.RegistryRetriever;
@@ -17,7 +20,10 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 
 	private ProxySet proxySet;
 	private Iterable<DesiredCapabilities> desiredCapabilities;
-	private boolean nodesStarted = false;
+	private List<Boolean> nodesStarted = Lists.newArrayList();
+	private List<String> browserStarted = Lists.newArrayList();
+	private List<Platform> platformStarted = Lists.newArrayList();
+	private List<Integer> numThreadsStarted = Lists.newArrayList();
 	private boolean nodeOldEnoughToStart = true;
 
 	public MockAutomationScaleNodeTask(RegistryRetriever retriever, MockVmManager vmManager) {
@@ -43,12 +49,11 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 	}
 
 	@Override
-	void startNodes(VmManager vmManager, int browsersToStart, String browser) throws NodesCouldNotBeStartedException {
-		nodesStarted = true;
-	}
-
-	public boolean isNodesStarted() {
-		return nodesStarted;
+	void startNodes(VmManager vmManager, int browsersToStart, String browser, Platform platform) throws NodesCouldNotBeStartedException {
+		nodesStarted.add(true);
+		numThreadsStarted.add(browsersToStart);
+		browserStarted.add(browser);
+		platformStarted.add(platform);
 	}
 
 	@Override
@@ -58,6 +63,22 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 
 	public void setNodeOldEnoughToStart(boolean nodeOldEnoughToStart) {
 		this.nodeOldEnoughToStart = nodeOldEnoughToStart;
+	}
+
+	public List<Boolean> getNodesStarted() {
+		return nodesStarted;
+	}
+
+	public List<String> getBrowserStarted() {
+		return browserStarted;
+	}
+
+	public List<Platform> getPlatformStarted() {
+		return platformStarted;
+	}
+
+	public List<Integer> getNumThreadsStarted() {
+		return numThreadsStarted;
 	}
 }
 

@@ -26,7 +26,7 @@ import com.rmn.qa.AutomationRunContext;
 import com.rmn.qa.RegistryRetriever;
 
 /**
- * Registry task which removes dynamic {@link AutomationDynamicNode nodes} from the internal tracking pending set as they come online
+ * Registry task which registers dynamic {@link AutomationDynamicNode nodes} as they come online
  *
  * @author mhardin
  */

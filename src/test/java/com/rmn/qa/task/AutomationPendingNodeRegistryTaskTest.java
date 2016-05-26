@@ -9,6 +9,7 @@ import org.openqa.grid.internal.ProxySet;
 import com.rmn.qa.AutomationCapabilityMatcher;
 import com.rmn.qa.AutomationConstants;
 import com.rmn.qa.AutomationContext;
+import com.rmn.qa.BaseTest;
 import com.rmn.qa.MockRemoteProxy;
 
 import junit.framework.Assert;
@@ -16,7 +17,7 @@ import junit.framework.Assert;
 /**
  * Created by matthew on 3/18/16.
  */
-public class AutomationPendingNodeRegistryTaskTest {
+public class AutomationPendingNodeRegistryTaskTest extends BaseTest {
 
 	@Test
 	public void testPendingNodeRemoved() {
