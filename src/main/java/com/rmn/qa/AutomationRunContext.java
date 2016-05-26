@@ -43,7 +43,7 @@ public final class AutomationRunContext {
     private Map<String, AutomationDynamicNode> nodes = Maps.newConcurrentMap();
     private Set<String> pendingStartupNodes = Collections.newSetFromMap(Maps.newConcurrentMap()); // Nodes that are currently starting up and have not registered yet
 
-    private int totalNodeCount;
+    private volatile int totalNodeCount;
 
     @VisibleForTesting
     AutomationRunContext() { }

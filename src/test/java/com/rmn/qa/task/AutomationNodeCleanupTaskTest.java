@@ -319,7 +319,8 @@ public class AutomationNodeCleanupTaskTest {
         Assert.assertEquals("Status should change to expired first", AutomationDynamicNode.STATUS.EXPIRED, node.getStatus());
         task.run();
         Assert.assertEquals("Node should be terminated as it was empty", AutomationDynamicNode.STATUS.TERMINATED, node.getStatus());
-        Assert.assertNull("Node should no longer be tracked",AutomationContext.getContext().getNode(node.getInstanceId()));
+        task.run();
+        Assert.assertNotNull("Node should still be tracked",AutomationContext.getContext().getNode(node.getInstanceId()));
         node.setEndDate(AutomationUtils.modifyDate(new Date(), -45, Calendar.MINUTE));
         task.run();
         Assert.assertNull("Node should not be tracked after its been terminated for 30 minutes", AutomationContext.getContext().getNode(node.getInstanceId()));

@@ -24,7 +24,7 @@ public class AutomationReaperTaskTest {
         Reservation reservation = new Reservation();
         Instance instance = new Instance();
         instance.setState(new InstanceState().withCode(10));
-        String instanceId = "foo";
+        String instanceId = "foobar";
         instance.setInstanceId(instanceId);
         instance.setLaunchTime(AutomationUtils.modifyDate(new Date(),-5,Calendar.HOUR));
         reservation.setInstances(Arrays.asList(instance));
