@@ -168,6 +168,9 @@ public final class AutomationUtils {
      * @return
      */
     public static Platform getUnderlyingFamily(Platform platform) {
+        if (platform == null) {
+            return null;
+        }
         if (platform == Platform.UNIX || platform == Platform.WINDOWS || platform == Platform.MAC || platform == Platform.ANY) {
             return platform;
         } else {

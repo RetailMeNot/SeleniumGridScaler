@@ -8,6 +8,8 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.beust.jcommander.internal.Lists;
+import com.rmn.qa.AutomationContext;
+import com.rmn.qa.AutomationDynamicNode;
 import com.rmn.qa.MockVmManager;
 import com.rmn.qa.NodesCouldNotBeStartedException;
 import com.rmn.qa.RegistryRetriever;
@@ -20,7 +22,7 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 
 	private ProxySet proxySet;
 	private Iterable<DesiredCapabilities> desiredCapabilities;
-	private List<Boolean> nodesStarted = Lists.newArrayList();
+	private List<AutomationDynamicNode> nodesStarted = Lists.newArrayList();
 	private List<String> browserStarted = Lists.newArrayList();
 	private List<Platform> platformStarted = Lists.newArrayList();
 	private List<Integer> numThreadsStarted = Lists.newArrayList();
@@ -49,15 +51,23 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 	}
 
 	@Override
-	void startNodes(VmManager vmManager, int browsersToStart, String browser, Platform platform) throws NodesCouldNotBeStartedException {
-		nodesStarted.add(true);
+	List<AutomationDynamicNode> startNodes(VmManager vmManager, int browsersToStart, String browser, Platform platform) throws NodesCouldNotBeStartedException {
+		List<AutomationDynamicNode> createdNodes = Lists.newArrayList();
 		numThreadsStarted.add(browsersToStart);
 		browserStarted.add(browser);
 		platformStarted.add(platform);
+		for (int i=0;i<browsersToStart;i++) {
+			String instance = "foo" + i;
+			AutomationDynamicNode createdNode = new AutomationDynamicNode(instance, instance, browser, platform, new Date(), 1);
+			AutomationContext.getContext().addPendingNode(createdNode);
+			createdNodes.add(createdNode);
+		}
+		nodesStarted.addAll(createdNodes);
+		return createdNodes;
 	}
 
 	@Override
-	boolean isNodeOldEnoughToCreateNewNode(Date nowDate, Date nodePendingDate) {
+	boolean haveTestRequestsBeenQueuedForLongEnough(Date nowDate, Date nodePendingDate) {
 		return nodeOldEnoughToStart;
 	}
 
@@ -65,7 +75,7 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 		this.nodeOldEnoughToStart = nodeOldEnoughToStart;
 	}
 
-	public List<Boolean> getNodesStarted() {
+	public List<AutomationDynamicNode> getNodesStarted() {
 		return nodesStarted;
 	}
 
@@ -79,6 +89,13 @@ public class MockAutomationScaleNodeTask extends AutomationScaleNodeTask {
 
 	public List<Integer> getNumThreadsStarted() {
 		return numThreadsStarted;
+	}
+
+	public void clear() {
+		nodesStarted = Lists.newArrayList();
+		browserStarted = Lists.newArrayList();
+		platformStarted = Lists.newArrayList();
+		numThreadsStarted = Lists.newArrayList();
 	}
 }
 
