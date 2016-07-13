@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.ec2.model.Instance;
+import com.google.common.collect.Lists;
 import com.rmn.qa.AutomationConstants;
 import com.rmn.qa.AutomationContext;
 import com.rmn.qa.AutomationDynamicNode;
@@ -107,7 +108,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new AutomationOrphanedNodeRegistryTask(this),
                 1L, 5L, TimeUnit.MINUTES);
         // Spin up a scheduled thread to track nodes that are pending startup
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new AutomationPendingNodeRegistryTask(this),
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new AutomationPendingNodeRegistryTask(this, ec2),
                 60L, 15L, TimeUnit.SECONDS);
         // Spin up a scheduled thread to analyzed queued requests to scale up capacity
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new AutomationScaleNodeTask(this, ec2),
@@ -209,7 +210,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
         AutomationRunRequest runRequest = new AutomationRunRequest(uuid, threadCountRequested, browserRequested, browserVersion, requestedPlatform);
         browserPlatformPairRequest = new BrowserPlatformPair(browserRequested, requestedPlatform);
 
-        log.info(String.format("Server request received.  Browser [%s] - Requested Node Count [%s] - Request UUID [%s]", browserRequested, threadCountRequested, uuid));
+        log.info(String.format("Server request [%s] received.", runRequest));
         boolean amisNeeded;
         int amiThreadsToStart=0;
         int currentlyAvailableNodes;
@@ -290,7 +291,7 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
      * @param threadCountRequested
      * @return
      */
-    public static void startNodes(VmManager ec2, String uuid,int threadCountRequested, String browser, Platform platform) throws NodesCouldNotBeStartedException {
+    public static List<AutomationDynamicNode> startNodes(VmManager ec2, String uuid,int threadCountRequested, String browser, Platform platform) throws NodesCouldNotBeStartedException {
         log.info(String.format("%d threads requested",threadCountRequested));
         try{
             String localhostname;
@@ -327,13 +328,16 @@ public class AutomationTestRunServlet extends RegistryBasedServlet implements Re
             log.info(String.format("%d instances started", instances.size()));
             // Reuse the start date since all the nodes were created within the same request
             Date startDate = new Date();
+            List<AutomationDynamicNode> createdNodes = Lists.newArrayList();
             for(Instance instance : instances) {
+                AutomationDynamicNode createdNode = new AutomationDynamicNode(uuid, instance.getInstanceId(), browser, platform, instance.getPrivateIpAddress(), startDate, numThreadsPerMachine, instance.getInstanceType());
                 // Add the node as pending startup to our context so we can track it in AutomationPendingNodeRegistryTask
-                AutomationContext.getContext().addPendingNode(instance.getInstanceId());
+                AutomationContext.getContext().addPendingNode(createdNode);
                 log.info("Node instance id: " + instance.getInstanceId());
-                AutomationContext.getContext().addNode(
-                        new AutomationDynamicNode(uuid, instance.getInstanceId(), browser, platform, instance.getPrivateIpAddress(), startDate, numThreadsPerMachine));
+                AutomationContext.getContext().addNode(createdNode);
+                createdNodes.add(createdNode);
             }
+            return createdNodes;
         } catch(Exception e) {
             log.error("Error trying to start nodes: ",e);
             throw new NodesCouldNotBeStartedException("Error trying to start nodes",e);

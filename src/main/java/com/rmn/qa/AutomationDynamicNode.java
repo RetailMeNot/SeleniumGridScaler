@@ -35,7 +35,7 @@ public final class AutomationDynamicNode implements Comparable<AutomationDynamic
     private static final int NODE_INTERVAL_LIFETIME = 55; // 55 minutes
 
     // TODO: Refactor this to be AutomationRunRequest
-    private final String uuid, instanceId, browser, ipAddress;
+    private final String uuid, instanceId, browser, ipAddress, instanceType;
     private final Platform platform;
     private Date startDate,endDate;
     private final int nodeCapacity;
@@ -55,6 +55,10 @@ public final class AutomationDynamicNode implements Comparable<AutomationDynamic
     }
 
     public AutomationDynamicNode(String uuid,String instanceId,String browser, Platform platform, String ipAddress, Date startDate, int nodeCapacity){
+        this(uuid, instanceId, browser, platform, ipAddress, startDate, nodeCapacity, null);
+    }
+
+    public AutomationDynamicNode(String uuid,String instanceId,String browser, Platform platform, String ipAddress, Date startDate, int nodeCapacity, String instanceType){
         this.uuid = uuid;
         this.instanceId = instanceId;
         this.browser = browser;
@@ -63,6 +67,7 @@ public final class AutomationDynamicNode implements Comparable<AutomationDynamic
         this.startDate = startDate;
         this.endDate = computeEndDate(startDate);
         this.nodeCapacity = nodeCapacity;
+        this.instanceType = instanceType;
         this.status = STATUS.RUNNING;
     }
 
@@ -170,6 +175,14 @@ public final class AutomationDynamicNode implements Comparable<AutomationDynamic
      */
     public int getNodeCapacity() {
         return nodeCapacity;
+    }
+
+    /**
+     * Returns the instance type of this node
+     * @return
+     */
+    public String getInstanceType() {
+        return instanceType;
     }
 
     /**
